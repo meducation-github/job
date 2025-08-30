@@ -165,13 +165,39 @@ export default function SurveyPage() {
 
   const completeSurvey = async () => {
     if (submissionId) {
-      // Update submission status to completed
-      const { error } = await supabase
-        .from("submissions")
-        .update({ status: "completed" })
-        .eq("id", submissionId);
+      try {
+        // Update submission status to completed
+        const { error } = await supabase
+          .from("submissions")
+          .update({ status: "completed" })
+          .eq("id", submissionId);
 
-      if (!error) {
+        if (error) {
+          console.error("Error updating submission status:", error);
+          return;
+        }
+
+        // Call the assessment edge function
+        const { data: assessmentData, error: assessmentError } =
+          await supabase.functions.invoke(
+            `do-assessment?submission_id=${submissionId}`,
+            {
+              body: {},
+            }
+          );
+
+        if (assessmentError) {
+          console.error("Error calling assessment function:", assessmentError);
+          // Continue with navigation even if assessment fails
+        } else {
+          console.log("Assessment completed:", assessmentData);
+        }
+
+        // Navigate to review page
+        navigate(`/review/${submissionId}`);
+      } catch (error) {
+        console.error("Error completing survey:", error);
+        // Still navigate to review page even if there's an error
         navigate(`/review/${submissionId}`);
       }
     }

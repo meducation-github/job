@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { AnswerRow } from "../types";
+import AssessmentDisplay from "../components/AssessmentDisplay";
 
 type Submission = {
   id: string;
   survey_id: string;
   user_id: string;
   status: string;
+  assessment?: any | null;
   created_at: string;
   updated_at: string;
 };
@@ -141,7 +143,8 @@ export default function ReviewSubmission() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
       <div className="card mb-6">
         <div className="flex items-center justify-between">
           <div>
@@ -165,29 +168,49 @@ export default function ReviewSubmission() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        {answers.map((answer) => {
-          const question = questions[answer.question_id];
-          if (!question) return null;
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Submission Answers */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            Survey Responses
+          </h2>
+          <div className="space-y-4">
+            {answers.map((answer) => {
+              const question = questions[answer.question_id];
+              if (!question) return null;
 
-          return (
-            <div key={answer.id} className="card">
-              <h3 className="text-lg font-medium">{question.question_text}</h3>
-              {question.help_text && (
-                <p className="text-sm text-gray-500 mt-1">
-                  {question.help_text}
-                </p>
-              )}
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                <p className="text-gray-900">
-                  {formatAnswer(answer, question)}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+              return (
+                <div key={answer.id} className="card">
+                  <h3 className="text-lg font-medium">
+                    {question.question_text}
+                  </h3>
+                  {question.help_text && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      {question.help_text}
+                    </p>
+                  )}
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-gray-900">
+                      {formatAnswer(answer, question)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Column - Assessment */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            Care Assessment
+          </h2>
+          <AssessmentDisplay assessment={submission.assessment} />
+        </div>
       </div>
 
+      {/* Footer Actions */}
       <div className="mt-8 flex gap-4">
         <button onClick={() => navigate("/dashboard")} className="btn-primary">
           Back to Dashboard

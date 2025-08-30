@@ -34,6 +34,7 @@ export type Submission = {
   survey_id: string;
   user_id: string;
   status: "in_progress" | "completed";
+  assessment?: any | null;
   created_at: string;
   updated_at: string;
 };
